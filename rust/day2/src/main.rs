@@ -20,15 +20,17 @@ fn main() {
         for chars in line.split(" ") {
             list.push(chars.to_string().parse::<i32>().unwrap());
         }
-        let part1 = is_safe(&list);
-        if part1.0 {
+        if is_safe(&list) {
             total += 1;
         } else {
-            let bad_index = part1.1;
-            list.remove(bad_index + 1);
-            if is_safe(&list).0 {
-                total2 += 1;
-                println!("{:?} - resolved", list);
+            for (i, _) in list.iter().enumerate() {
+                let mut test_list = list.clone();
+                test_list.remove(i);
+                if is_safe(&test_list) {
+                    total2 += 1;
+                    println!("{:?} - resolved", list);
+                    break;
+                }
             }
         }
     }
@@ -36,7 +38,7 @@ fn main() {
     println!("part 2: {}", total + total2);
 }
 
-fn is_safe(list: &Vec<i32>) -> (bool, usize) {
+fn is_safe(list: &Vec<i32>) -> bool {
     let mut list_order = Order::Waiting;
     for (i, current) in list.iter().enumerate() {
         let next = match list.get(i + 1) {
@@ -46,7 +48,7 @@ fn is_safe(list: &Vec<i32>) -> (bool, usize) {
         let difference = (current - next).abs();
         if difference > 3 || difference == 0 {
             println!("{:?} - bad difference", list);
-            return (false, i);
+            return false;
         }
         let current_order = match &next > current {
             true => Order::Ascending,
@@ -58,8 +60,8 @@ fn is_safe(list: &Vec<i32>) -> (bool, usize) {
         }
         if list_order != current_order {
             println!("{:?} - bad order", list);
-            return (false, i);
+            return false;
         }
     }
-    (true, 0)
+    true
 }
