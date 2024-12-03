@@ -1,25 +1,38 @@
 use std::fs;
 
 fn main() {
-    let contents = fs::read_to_string("input.txt").unwrap();
-
-    let mut total = 0;
-    for line in contents.split("\n") {
-        total += muls(line)
-    }
-    println!("part 1: {}", total)
+    let mut contents = fs::read_to_string("input.txt").unwrap();
+    contents = contents.replace("\n", "");
+    let total = muls(contents.as_str(), false);
+    let total2 = muls(contents.as_str(), true);
+    println!("part 1: {}", total);
+    println!("part 2: {}", total2)
 }
 
-fn muls(line: &str) -> i32 {
+fn muls(line: &str, part2: bool) -> i32 {
     let mut total = 0;
     let mut operations: Vec<String> = Vec::new();
     let mut partial_operation = "".to_string();
-    for char in line.chars() {
+    let dos = filter_op(line, "do()");
+    let donts = filter_op(line, "don't()");
+    let mut toggle = true;
+    for (i, char) in line.chars().into_iter().enumerate() {
+        if dos.contains(&i) {
+            toggle = true;
+            println!("on")
+        }
+        if donts.contains(&i) {
+            toggle = false;
+            println!("off")
+        }
         partial_operation.push(char);
         if !is_valid_so_far(partial_operation.as_str()) {
             partial_operation.clear();
         } else {
             if char == ')' {
+                if part2 && !toggle {
+                    continue;
+                }
                 operations.push(partial_operation.clone());
                 partial_operation.clear();
             }
@@ -92,4 +105,15 @@ fn evaluate(operation: &str) -> i32 {
     let num1 = pair.0.parse::<i32>().unwrap();
     let num2 = pair.1.parse::<i32>().unwrap();
     num1 * num2
+}
+
+fn filter_op(line: &str, op: &str) -> Vec<usize> {
+    let mut line = line.to_string();
+    let mut indexes: Vec<usize> = Vec::new();
+    while line.find(op) != Option::None {
+        indexes.push(line.find(op).unwrap());
+        line = line.replacen(op, "", 1);
+    }
+    assert!(!line.contains(op));
+    indexes
 }
