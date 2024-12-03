@@ -112,8 +112,16 @@ fn filter_op(line: &str, op: &str) -> Vec<usize> {
     let mut indexes: Vec<usize> = Vec::new();
     while line.find(op) != Option::None {
         indexes.push(line.find(op).unwrap());
-        line = line.replacen(op, "", 1);
+        line = line.replacen(op, template(op.len()).as_str(), 1);
     }
     assert!(!line.contains(op));
     indexes
+}
+
+fn template(length: usize) -> String {
+    let mut t = "".to_string();
+    for _ in 0..length {
+        t.push('.');
+    }
+    t
 }
